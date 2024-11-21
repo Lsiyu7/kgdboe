@@ -18,12 +18,20 @@ static volatile int s_OutgoingBufferUsed;
 
 static bool s_StoppedInKgdb;
 
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(5, 8, 0)
+static void kgdboe_tasklet_bpt(unsigned long p)
+#else
 static void kgdboe_tasklet_bpt(struct tasklet_struct *p)
+#endif
 {
     kgdb_breakpoint();
 }
 
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(5, 8, 0)
+static DECLARE_TASKLET(kgdboe_tasklet_breakpoint, kgdboe_tasklet_bpt, 0);
+#else
 static DECLARE_TASKLET(kgdboe_tasklet_breakpoint, kgdboe_tasklet_bpt);
+#endif
 
 void kgdb_schedule_breakpoint(void)
 {
